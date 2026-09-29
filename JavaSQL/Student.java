@@ -20,7 +20,8 @@ class Student{
                 System.out.println("Error: DB_USER or DB_PASSWORD environment variables not set!");
                 return;
             }
-            con=DriverManager.getConnection("jdbc:mysql://localhost:3306/", user, password);
+            String dbHost = System.getenv().getOrDefault("DB_HOST", "localhost");
+            con=DriverManager.getConnection("jdbc:mysql://" + dbHost + ":3306/", user, password);
             DatabaseSetup.createDatabaseAndTables(con);
             con.close();
             
@@ -123,7 +124,9 @@ class Student{
                     AttendanceService.generateAttendanceReport(rollReport);
                     break;
                 case 8:
-                    return;
+                    System.out.println("Exiting...");
+                    System.exit(0);
+                    break;
                 default:
                     System.out.println("The choice is invalid");
                     break;
@@ -157,7 +160,9 @@ class Student{
                     AttendanceService.markAttendance(roll, status);
                     break;
                 case 3:
-                    return;
+                    System.out.println("Exiting...");
+                    System.exit(0);
+                    break;
                 default:
                     System.out.println("The choice is invalid");
                     break;
@@ -174,12 +179,15 @@ class Student{
         sc.nextLine();
         System.out.println("Enter the class of the student : ");
         String standard=sc.nextLine();
-        String sql="Insert into student (name,rollno,age,standard) values (?,?,?,?)";
+        System.out.println("Has the fee been paid? (yes/no): ");
+        boolean paid = sc.nextLine().trim().equalsIgnoreCase("yes");
+        String sql="Insert into student (name,rollno,age,standard,paid) values (?,?,?,?,?)";
         try(PreparedStatement pstmt=con.prepareStatement(sql)){
             pstmt.setString(1,name);
             pstmt.setString(2,rollno);
             pstmt.setInt(3,age);
             pstmt.setString(4,standard);
+            pstmt.setBoolean(5, paid);
             int rows=pstmt.executeUpdate();
             if (rows==0)
                 System.out.println("The student record wasn't added successfilly !");
@@ -207,7 +215,7 @@ class Student{
                         String rollno=rs.getString("RollNo");
                         int age=rs.getInt("age");
                         String standard=rs.getString("Standard");
-                        System.out.println(name+" "+rollno+" "+age+" "+standard);
+                        System.out.println(name+" "+rollno+" "+age+" "+standard+" "+(rs.getBoolean("Paid")?"Paid":"Unpaid"));
                     }
                 }
                 break;
@@ -249,7 +257,7 @@ class Student{
                         String rollno=rs.getString("RollNo");
                         int age=rs.getInt("age");
                         String standard=rs.getString("Standard");
-                        System.out.println(name+" "+rollno+" "+age+" "+standard);
+                        System.out.println(name+" "+rollno+" "+age+" "+standard+" "+(rs.getBoolean("Paid")?"Paid":"Unpaid"));
                     }
                 }
                 break;
@@ -267,7 +275,7 @@ class Student{
                         String rollno=rs.getString("RollNo");
                         int age=rs.getInt("age");
                         String standard=rs.getString("Standard");
-                        System.out.println(name+" "+rollno+" "+age+" "+standard);
+                        System.out.println(name+" "+rollno+" "+age+" "+standard+" "+(rs.getBoolean("Paid")?"Paid":"Unpaid"));
                     }
                     if(!found)
                         System.out.println("There is no student with name as "+Searchname);
@@ -286,6 +294,7 @@ class Student{
         System.out.println("1. Update the name of the student");
         System.out.println("2. Update the age of the student");
         System.out.println("3. Update the standard of the student");
+        System.out.println("4. Update the paid status of the student");
         int ch=sc.nextInt();
         sc.nextLine();
         switch (ch) {
@@ -334,6 +343,17 @@ class Student{
                         System.out.println("Rows affected : "+rows);
                 }
                 break;
+            case 4:
+        System.out.println("Has the fee been paid now? (yes/no): ");
+        boolean paidStatus = sc.nextLine().trim().equalsIgnoreCase("yes");
+        String sqlUpdatePaid="Update student set Paid=? where RollNo=?";
+        try(PreparedStatement pstmt=con.prepareStatement(sqlUpdatePaid)){
+            pstmt.setBoolean(1,paidStatus);
+            pstmt.setString(2, roll);
+            int rows=pstmt.executeUpdate();
+            System.out.println(rows==0 ? "The student record wasn't updated successfully !" : "Rows affected : "+rows);
+        }
+        break;
 
             default:
                 System.out.println("Invalid Choice !");

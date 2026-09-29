@@ -1,0 +1,38 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: student_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      # Using root for DB_USER keeps things simple for local dev, since
+      # DatabaseSetup.java needs CREATE DATABASE privileges on first run.
+      # For anything beyond local learning/dev, create a scoped user instead.
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+ 
+  # --- Optional: uncomment once you're ready to containerize the Java app too ---
+  # app:
+  #   build:
+  #     context: ./JavaSQL
+  #   container_name: student_app
+  #   depends_on:
+  #     mysql:
+  #       condition: service_healthy
+  #   environment:
+  #     DB_HOST: mysql
+  #     DB_USER: root
+  #     DB_PASSWORD: ${DB_PASSWORD}
+  #   stdin_open: true   # keeps the console menu interactive
+  #   tty: true
+ 
+volumes:
+  mysql_data:
+ 
