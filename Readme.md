@@ -92,22 +92,67 @@ Once the student records are added the StudentData.csv will appear inside the di
 
 ### Running Database-Based Version (MySQL)
 
-1. Make sure MySQL is installed and running.
-2. Update database credentials in your code or environment variables.
-3. Navigate to the `JavaSQL` directory.
-4. Compile all Java files:
+## One-time setup
+1. Make sure Docker Desktop is installed and running.
+2. Create a .env folder and set the values of the attributes as given :
+```
+DB_PASSWORD=your_password_here
+DB_USER=root
+```
+3. Download the MySQL Connector/J jar and place it in a lib/ folder in the project root.
+
+## Everytime we want to to run
+1. From the project root, start the database:
 
 ```
-javac *.java
+docker compose -d mysql
 ```
-
-5. Run the main program:
+2. Incase any .java file is to be recompiled. The below given command should be run from the project folder:
+   
+```
+javac -cp ".;lib\mysql-connector-j-26.7.0.jar" JavaSQL\*.java
+```
+3. Run the app: run.ps1 does three things for you automatically, in order:
+   Reads your .env file line by line.Sets DB_USER and DB_PASSWORD as environment variables for
+   this terminal session. Launches the Java app with the correct classpath (java -cp ".;lib\mysql-connector-j-26.7.0.jar" JavaSQL.Student). So instead of typing three separate commands by hand like before, you just run:
 
 ```
-java Student
+.\run.ps1
 ```
 
 The database and required tables will be created automatically if they do not exist.
+
+##Default login
+
+```
+Username: admin
+Password: admin123
+```
+##Stop/Restart the container
+
+-To pause the container, but keep the data
+
+```
+docker compose stop mysql
+```
+
+-Start it back
+
+```
+docker compose up -d mysql
+```
+
+-Remove the container, but data is safe in mysql_data volume
+
+```
+docker compose down
+```
+
+-Remove the container as well as the volume which will result in the data to be permanently to be deleted
+
+```
+docker compose down -v
+```
 
 ## Future Improvements
 
