@@ -122,13 +122,13 @@ javac -cp ".;lib\mysql-connector-j-26.7.0.jar" JavaSQL\*.java
 
 The database and required tables will be created automatically if they do not exist.
 
-##Default login
+## Default login
 
 ```
 Username: admin
 Password: admin123
 ```
-##Stop/Restart the container
+## Stop/Restart the container
 
 -To pause the container, but keep the data
 
